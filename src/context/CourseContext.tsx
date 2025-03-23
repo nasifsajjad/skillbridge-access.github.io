@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 export type Lesson = {
@@ -125,12 +125,58 @@ const MOCK_USER_PROGRESS: UserProgress[] = [
   },
 ];
 
+// Helper functions for localStorage
+const getLocalStorageCourses = (): Course[] => {
+  const storedCourses = localStorage.getItem('courses');
+  if (storedCourses) {
+    try {
+      return JSON.parse(storedCourses);
+    } catch (error) {
+      console.error('Error parsing courses from localStorage:', error);
+      return MOCK_COURSES;
+    }
+  }
+  return MOCK_COURSES;
+};
+
+const getLocalStorageProgress = (): UserProgress[] => {
+  const storedProgress = localStorage.getItem('userProgress');
+  if (storedProgress) {
+    try {
+      return JSON.parse(storedProgress);
+    } catch (error) {
+      console.error('Error parsing user progress from localStorage:', error);
+      return MOCK_USER_PROGRESS;
+    }
+  }
+  return MOCK_USER_PROGRESS;
+};
+
 const CourseContext = createContext<CourseContextType | undefined>(undefined);
 
 export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [courses, setCourses] = useState<Course[]>(MOCK_COURSES);
-  const [userProgress, setUserProgress] = useState<UserProgress[]>(MOCK_USER_PROGRESS);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [userProgress, setUserProgress] = useState<UserProgress[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Initialize from localStorage on component mount
+  useEffect(() => {
+    setCourses(getLocalStorageCourses());
+    setUserProgress(getLocalStorageProgress());
+  }, []);
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    if (courses.length > 0) {
+      localStorage.setItem('courses', JSON.stringify(courses));
+    }
+  }, [courses]);
+
+  useEffect(() => {
+    if (userProgress.length > 0) {
+      localStorage.setItem('userProgress', JSON.stringify(userProgress));
+    }
+  }, [userProgress]);
 
   // Create a new course
   const createCourse = async (courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt'>): Promise<Course> => {
