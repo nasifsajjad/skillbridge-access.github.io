@@ -9,6 +9,7 @@ type LessonContentProps = {
   lesson: Lesson;
   onComplete: () => void;
   isCompleted: boolean;
+  isLoading?: boolean;
   className?: string;
 };
 
@@ -16,6 +17,7 @@ const LessonContent: React.FC<LessonContentProps> = ({
   lesson,
   onComplete,
   isCompleted,
+  isLoading = false,
   className,
 }) => {
   const renderContent = () => {
@@ -69,10 +71,10 @@ const LessonContent: React.FC<LessonContentProps> = ({
           variant={isCompleted ? "outline" : "default"}
           className="gap-2"
           onClick={onComplete}
-          disabled={isCompleted}
+          disabled={isCompleted || isLoading}
         >
           <CheckCircle size={16} />
-          {isCompleted ? 'Completed' : 'Mark as Complete'}
+          {isLoading ? 'Saving...' : isCompleted ? 'Completed' : 'Mark as Complete'}
         </Button>
       </div>
     </div>
