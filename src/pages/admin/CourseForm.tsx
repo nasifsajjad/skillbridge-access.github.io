@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCourses, Lesson } from '@/context/CourseContext';
@@ -355,7 +356,7 @@ const AdminCourseForm = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {'id' in currentLesson! && currentLesson!.id ? 'Edit Lesson' : 'Add New Lesson'}
+              {currentLesson && 'id' in currentLesson && currentLesson.id ? 'Edit Lesson' : 'Add New Lesson'}
             </DialogTitle>
             <DialogDescription>
               Fill in the details for this lesson
@@ -446,7 +447,7 @@ const AdminCourseForm = () => {
               Cancel
             </Button>
             <Button onClick={handleSaveLesson}>
-              {'id' in currentLesson! && currentLesson!.id ? 'Update Lesson' : 'Add Lesson'}
+              {currentLesson && 'id' in currentLesson && currentLesson.id ? 'Update Lesson' : 'Add Lesson'}
             </Button>
           </DialogFooter>
         </DialogContent>
