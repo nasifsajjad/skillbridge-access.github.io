@@ -18,9 +18,9 @@ const Index = () => {
   return (
     <div className="flex flex-col w-full animate-fade-in">
       {/* Header Section */}
-      <header className="w-full bg-background border-b border-border py-4">
+      <header className="w-full bg-primary py-4">
         <div className="container mx-auto flex justify-center items-center">
-          <h1 className="text-3xl font-bold text-primary">NB Institution</h1>
+          <h1 className="text-3xl font-bold text-white">NB Institution</h1>
         </div>
       </header>
       
