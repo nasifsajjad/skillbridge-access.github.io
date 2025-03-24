@@ -152,6 +152,14 @@ const getLocalStorageProgress = (): UserProgress[] => {
   return MOCK_USER_PROGRESS;
 };
 
+const saveToLocalStorage = (key: string, data: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error(`Error saving ${key} to localStorage:`, error);
+  }
+};
+
 const CourseContext = createContext<CourseContextType | undefined>(undefined);
 
 export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -168,13 +176,13 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Save to localStorage whenever data changes
   useEffect(() => {
     if (courses.length > 0) {
-      localStorage.setItem('courses', JSON.stringify(courses));
+      saveToLocalStorage('courses', courses);
     }
   }, [courses]);
 
   useEffect(() => {
     if (userProgress.length > 0) {
-      localStorage.setItem('userProgress', JSON.stringify(userProgress));
+      saveToLocalStorage('userProgress', userProgress);
     }
   }, [userProgress]);
 
