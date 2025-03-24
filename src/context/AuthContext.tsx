@@ -10,6 +10,14 @@ export type User = {
   deviceId?: string;
 };
 
+type StoredUser = {
+  id: string;
+  email: string;
+  password: string;
+  name: string;
+  role: 'admin' | 'user';
+};
+
 type AuthContextType = {
   user: User | null;
   loading: boolean;
@@ -21,8 +29,8 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user data for demonstration
-const MOCK_USERS = [
+// Initial mock users
+const INITIAL_MOCK_USERS: StoredUser[] = [
   {
     id: '1',
     email: 'admin@nbinstitution.com',
@@ -45,9 +53,29 @@ const generateDeviceId = () => {
          Math.random().toString(36).substring(2, 15);
 };
 
+// Generate a unique ID for new users
+const generateUserId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Initialize users in localStorage if they don't exist
+  useEffect(() => {
+    const initializeUsers = () => {
+      // Check if users already exist in localStorage
+      const storedUsers = localStorage.getItem('nbUsers');
+      
+      if (!storedUsers) {
+        // If no users exist, initialize with mock users
+        localStorage.setItem('nbUsers', JSON.stringify(INITIAL_MOCK_USERS));
+      }
+    };
+    
+    initializeUsers();
+  }, []);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -87,7 +115,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const matchedUser = MOCK_USERS.find(
+      // Get all users from localStorage
+      const storedUsers = localStorage.getItem('nbUsers');
+      if (!storedUsers) {
+        throw new Error('User database not found');
+      }
+      
+      const users: StoredUser[] = JSON.parse(storedUsers);
+      
+      const matchedUser = users.find(
         u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
       );
       
@@ -128,29 +164,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Get all users from localStorage
+      const storedUsers = localStorage.getItem('nbUsers');
+      if (!storedUsers) {
+        throw new Error('User database not found');
+      }
+      
+      const users: StoredUser[] = JSON.parse(storedUsers);
+      
       // Check if email already exists
-      if (MOCK_USERS.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
         throw new Error('Email already registered');
       }
       
-      // In a real app, you would call an API to create the user
-      // Since this is a mock, we'll just create a session
-      
-      // Generate new device ID for this session
+      // Generate new user ID and device ID
+      const userId = generateUserId();
       const deviceId = generateDeviceId();
       localStorage.setItem('nbDeviceId', deviceId);
       
+      // Create new user
+      const newUser: StoredUser = {
+        id: userId,
+        email,
+        password,
+        name,
+        role: 'user',
+      };
+      
+      // Add to users array and update localStorage
+      users.push(newUser);
+      localStorage.setItem('nbUsers', JSON.stringify(users));
+      
       // Create user session
-      const newUser = {
-        id: Math.random().toString(36).substring(7),
+      const userWithDevice = {
+        id: userId,
         email,
         name,
         role: 'user' as const,
         deviceId,
       };
       
-      localStorage.setItem('nbUser', JSON.stringify(newUser));
-      setUser(newUser);
+      localStorage.setItem('nbUser', JSON.stringify(userWithDevice));
+      setUser(userWithDevice);
       
       toast.success('Registration successful!');
     } catch (error) {
