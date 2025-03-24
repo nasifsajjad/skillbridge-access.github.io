@@ -9,13 +9,17 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  plugins: [
-    react(),
-    // Remove componentTagger plugin which might be causing issues
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    // Add more specific build options to help with compatibility
+    sourcemap: true,
+    commonjsOptions: {
+      include: [/node_modules/],
     },
   },
 }));
